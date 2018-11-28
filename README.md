@@ -19,4 +19,6 @@ By default the application will serve on port 8080. You can change this in the
 You will most likely need to test this on an Android or iOS device. The
 application will print your local network IP on startup to make this easier.
 
-![](https://github.com/evanshortiss/web-device-orientation-motion/raw/master/screenshots/android-chrome.png)
+<div style="text-align: center;">
+  <img src="https://github.com/evanshortiss/web-device-orientation-motion/raw/master/screenshots/android-chrome.png" width="400">
+</div>
