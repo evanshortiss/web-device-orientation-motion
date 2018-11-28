@@ -1,0 +1,92 @@
+<!doctype html>
+
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
+
+    <style>
+      * {
+        text-align: center;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h2>Motion</h2>
+    <div class="row">
+      <div class="one-half column">
+        <h5>Acceleration: <span id="maccel">?</span></h5>
+      </div>
+      <div class="one-half column">
+        <h5>Acceleration w/ Gravity: <span id="maccelg">?</span></h5>
+      </div>
+    </div>
+    <div class="row">
+      <div class="one-half column">
+        <h5>Rotation Rate: <span id="mrr">?</span></h5>
+      </div>
+      <div class="one-half column">
+        <h5>Interval: <span id="mint">?</span></h5>
+      </div>
+    </div>
+
+    <h2>Orientation</h2>
+    <div class="row">
+      <div class="one-half column">
+        <h5>Absolute: <span id="oabsolute">?</span></h5>
+      </div>
+      <div class="one-half column">
+        <h5>Alpha: <span id="oalpha">?</span></h5>
+      </div>
+    </div>
+    <div class="row">
+      <div class="one-half column">
+        <h5>Beta: <span id="obeta">?</span></h5>
+      </div>
+      <div class="one-half column">
+        <h5>Gamma: <span id="ogamma">?</span></h5>
+      </div>
+    </div>
+  </body>
+
+  <script>
+    const oabsolute = document.getElementById('oabsolute')
+    const oalpha = document.getElementById('oalpha')
+    const obeta = document.getElementById('obeta')
+    const ogamma = document.getElementById('ogamma')
+
+    const onOrientationEvent = (e) => {
+      oabsolute.textContent = e.absolute
+      oalpha.textContent = e.alpha.toFixed(4)
+      obeta.textContent = e.beta.toFixed(4)
+      ogamma.textContent = e.gamma.toFixed(4)
+    }
+
+    window.addEventListener('deviceorientation', onOrientationEvent, true);
+  </script>
+
+  <script>
+    const maccel = document.getElementById('maccel')
+    const maccelg = document.getElementById('maccelg')
+    const mrr = document.getElementById('mrr')
+    const mint = document.getElementById('mint')
+
+    let latestEvent = null
+
+    // Throttle UI update to once per second (otherwise...aaaagh my eyes!)
+    let updateInterval = setInterval(() => {
+      if (latestEvent) {
+        maccel.textContent = `${latestEvent.acceleration.x.toFixed(2)}x, ${latestEvent.acceleration.y.toFixed(2)}y, ${latestEvent.acceleration.z.toFixed(2)}z`
+        maccelg.textContent = `${latestEvent.accelerationIncludingGravity.x.toFixed(2)}x, ${latestEvent.accelerationIncludingGravity.y.toFixed(2)}y, ${latestEvent.accelerationIncludingGravity.z.toFixed(2)}z`
+        mrr.textContent = `${latestEvent.rotationRate.alpha.toFixed(2)}α, ${latestEvent.rotationRate.beta.toFixed(2)}β, ${latestEvent.rotationRate.gamma.toFixed(2)}γ`
+        mint.textContent = `${latestEvent.interval}ms`
+      }
+    }, 1000)
+
+    const onMotionEvent = e => latestEvent = e
+
+    window.addEventListener('devicemotion', onMotionEvent, true);
+  </script>
+</html>
