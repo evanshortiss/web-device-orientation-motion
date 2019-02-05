@@ -172,7 +172,7 @@
             interval: latestEvent.interval,
             ts: Date.now()
           })
-        } else if (downloadMotionDataBtn.getAttribute('disabled') === 'true') {
+        } else if (latestEvent && downloadMotionDataBtn.getAttribute('disabled') === 'true') {
           const filename = 'motion-events.json'
           const data = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(capturedEvents));
 
