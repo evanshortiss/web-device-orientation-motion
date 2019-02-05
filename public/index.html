@@ -152,7 +152,7 @@
           mint.textContent = `${latestEvent.interval}ms`
         }
 
-        if (new Date().getTime() < endTs) {
+        if (latestEvent && new Date().getTime() < endTs) {
           capturedEvents.push({
             acceleration: {
               x: latestEvent.acceleration.x,
