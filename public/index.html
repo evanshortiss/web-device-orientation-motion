@@ -18,11 +18,11 @@
     </style>
   </head>
 
-  <body>
-    <div id="loading-panel" class="container" style="padding-top: 2vh">
+  <body style="padding-top: 2vh">
+    <div id="supported-check-panel" class="container">
       <h2>Unsupported Device</h2>
-      <p style="margin-bottom: 1rem">Hmm, we can't detect any movement from your device...</p>
-      <p>Try visiting on a mobile device, tablet, or device that supports <a href="https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent">DeviceMotionEvent</a> and <a href="https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent">DeviceOrientationEvent</a>.</p>
+      <p style="margin-bottom: 1rem">Hmm, we're not seeing any movement or orientation coming from your device...</p>
+      <p>Try visiting on a phone, tablet, or device that supports <a href="https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent">DeviceMotionEvent</a> and <a href="https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent">DeviceOrientationEvent</a>.</p>
       <br>
       <img src="https://imgs.xkcd.com/comics/xkcd_phone.png" alt="XKCD #1363 - The XKCD Phone"/>
       <br>
@@ -49,8 +49,10 @@
       </div>
 
       <div>
-        <a disabled="true" id="download-motion" class="button">Preparing Motion JSON...</a>
+        <a disabled="true" id="download-motion" class="button">Capturing Motion JSON...</a>
       </div>
+
+      <hr>
 
       <h2>Orientation</h2>
       <div class="row">
@@ -71,24 +73,40 @@
       </div>
 
       <div>
-        <a disabled="true" id="download-orientation" class="button">Preparing Orientation JSON...</a>
+        <a disabled="true" id="download-orientation" class="button">Capturing Orientation JSON...</a>
       </div>
     </div>
   </body>
 
   <script>
-    // If this event fires then the device is supported so we can show the
-    // captured events panel
-    window.addEventListener('deviceorientation', () => {
-      document.getElementById('loading-panel').style = 'display: none;'
+    // Run all captures for 10 seconds
+    const captureSeconds = 10
+
+    // Need to use this to determine if we've initialised the application since
+    // the initial listener can somehow fire multiple times before removal
+    let appInitialised = false
+
+    window.addEventListener('deviceorientation', applicationInitialisationEvent, true)
+
+    function applicationInitialisationEvent () {
+      if (appInitialised) {
+        return
+      }
+
+      appInitialised = true
+
+      console.log('intialising the application')
+
+      document.getElementById('supported-check-panel').style = 'display: none;'
       document.getElementById('capture-panel').style = ''
 
       startMotionCapture()
       startOrientationCapture()
-    }, true);
+
+      window.removeEventListener('deviceorientation', applicationInitialisationEvent)
+    }
 
     function startOrientationCapture () {
-      const captureSeconds = 10
       const capturedEvents = []
       const startTs = new Date().getTime()
       const endTs = startTs + captureSeconds * 1000
@@ -113,25 +131,27 @@
             gamma: e.gamma,
             ts: Date.now()
           })
-        } else if (downloadOrientationDataBtn.getAttribute('disabled') === 'true') {
-          const filename = 'orientation-events.json'
-          const data = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(capturedEvents));
-
-          downloadOrientationDataBtn.setAttribute('href', data);
-          downloadOrientationDataBtn.setAttribute('download', filename);
-          downloadOrientationDataBtn.setAttribute('disabled', 'false')
-          downloadOrientationDataBtn.textContent = 'Download Orientation JSON'
-
-          alert(`Captured ${capturedEvents.length} orientation events. JSON size is ${JSON.stringify(capturedEvents).length / 1024}kb. Use the button to download it.`)
         }
       }
 
+      setTimeout(() => {
+        const filename = 'orientation-events.json'
+        const data = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(capturedEvents))
 
-      window.addEventListener('deviceorientation', onOrientationEvent, true);
+        downloadOrientationDataBtn.className = 'button button-primary'
+        downloadOrientationDataBtn.setAttribute('href', data)
+        downloadOrientationDataBtn.setAttribute('download', filename)
+        downloadOrientationDataBtn.setAttribute('disabled', 'false')
+        downloadOrientationDataBtn.textContent = 'Download Orientation JSON'
+
+        alert(`Captured ${capturedEvents.length} orientation events. JSON size is ${Math.round(JSON.stringify(capturedEvents).length / 1024)}kb. Use the button to download it.`)
+      }, endTs - startTs)
+
+
+      window.addEventListener('deviceorientation', onOrientationEvent, true)
     }
 
     function startMotionCapture () {
-      const captureSeconds = 10
       const capturedEvents = []
       const startTs = new Date().getTime()
       const endTs = startTs + captureSeconds * 1000
@@ -152,8 +172,12 @@
           mrr.textContent = `${latestEvent.rotationRate.alpha.toFixed(2)}α, ${latestEvent.rotationRate.beta.toFixed(2)}β, ${latestEvent.rotationRate.gamma.toFixed(2)}γ`
           mint.textContent = `${latestEvent.interval}ms`
         }
+      }, 100)
 
-        if (latestEvent && new Date().getTime() < endTs) {
+      const onMotionEvent = (e) => {
+        latestEvent = e
+
+        if (new Date().getTime() < endTs) {
           capturedEvents.push({
             acceleration: {
               x: latestEvent.acceleration.x,
@@ -173,22 +197,23 @@
             interval: latestEvent.interval,
             ts: Date.now()
           })
-        } else if (latestEvent && downloadMotionDataBtn.getAttribute('disabled') === 'true') {
-          const filename = 'motion-events.json'
-          const data = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(capturedEvents));
-
-          downloadMotionDataBtn.setAttribute('href', data);
-          downloadMotionDataBtn.setAttribute('download', filename);
-          downloadMotionDataBtn.setAttribute('disabled', 'false')
-          downloadMotionDataBtn.textContent = 'Download Motion JSON'
-
-          alert(`Captured ${capturedEvents.length} motion events. JSON size is ${JSON.stringify(capturedEvents).length / 1024}kb. Use the button to download it.`)
         }
-      }, 100)
+      }
 
-      const onMotionEvent = e => latestEvent = e
+      setTimeout(() => {
+        const filename = 'motion-events.json'
+        const data = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(capturedEvents))
 
-      window.addEventListener('devicemotion', onMotionEvent, true);
+        downloadMotionDataBtn.className = 'button button-primary'
+        downloadMotionDataBtn.setAttribute('href', data)
+        downloadMotionDataBtn.setAttribute('download', filename)
+        downloadMotionDataBtn.setAttribute('disabled', 'false')
+        downloadMotionDataBtn.textContent = 'Download Motion JSON'
+
+        alert(`Captured ${capturedEvents.length} motion events. JSON size is ${Math.round(JSON.stringify(capturedEvents).length / 1024)}kb. Use the button to download it.`)
+      }, endTs - startTs)
+
+      window.addEventListener('devicemotion', onMotionEvent, true)
     }
   </script>
 </html>
