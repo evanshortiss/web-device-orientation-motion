@@ -13,15 +13,16 @@
       }
 
       p {
-        font-size: 12pt;
+        font-size: 12.5pt;
       }
     </style>
   </head>
 
   <body>
-    <div id="loading-panel" style="padding-top: 2vh">
+    <div id="loading-panel" class="container" style="padding-top: 2vh">
       <h2>Unsupported Device</h2>
-      <p style="margin-bottom: 1rem">Please try visiting on a mobile device, tablet, or device that supports <a href="https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent">DeviceMotionEvent</a> and <a href="https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent">DeviceOrientationEvent</a>.</p>
+      <p style="margin-bottom: 1rem">Hmm, we can't detect any movement from your device...</p>
+      <p>Try visiting on a mobile device, tablet, or device that supports <a href="https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent">DeviceMotionEvent</a> and <a href="https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent">DeviceOrientationEvent</a>.</p>
       <br>
       <img src="https://imgs.xkcd.com/comics/xkcd_phone.png" alt="XKCD #1363 - The XKCD Phone"/>
       <br>
@@ -57,15 +58,15 @@
           <h5>Absolute: <span id="oabsolute">?</span></h5>
         </div>
         <div class="one-half column">
-          <h5>Alpha: <span id="oalpha">?</span></h5>
+          <h5>Alpha (z): <span id="oalpha">?</span></h5>
         </div>
       </div>
       <div class="row">
         <div class="one-half column">
-          <h5>Beta: <span id="obeta">?</span></h5>
+          <h5>Beta (x): <span id="obeta">?</span></h5>
         </div>
         <div class="one-half column">
-          <h5>Gamma: <span id="ogamma">?</span></h5>
+          <h5>Gamma (y): <span id="ogamma">?</span></h5>
         </div>
       </div>
 
