@@ -32,6 +32,10 @@
       </div>
     </div>
 
+    <div>
+      <a disabled="true" id="download-motion" class="button">Preparing Motion JSON...</a>
+    </div>
+
     <h2>Orientation</h2>
     <div class="row">
       <div class="one-half column">
@@ -49,25 +53,63 @@
         <h5>Gamma: <span id="ogamma">?</span></h5>
       </div>
     </div>
+
+    <div>
+      <a disabled="true" id="download-orientation" class="button">Preparing Orientation JSON...</a>
+    </div>
   </body>
 
   <script>
-    const oabsolute = document.getElementById('oabsolute')
-    const oalpha = document.getElementById('oalpha')
-    const obeta = document.getElementById('obeta')
-    const ogamma = document.getElementById('ogamma')
+    (function () {
+      const captureSeconds = 10
+      const capturedEvents = []
+      const startTs = new Date().getTime()
+      const endTs = startTs + captureSeconds * 1000
+      const downloadOrientationDataBtn = document.getElementById('download-orientation')
 
-    const onOrientationEvent = (e) => {
-      oabsolute.textContent = e.absolute
-      oalpha.textContent = e.alpha.toFixed(4)
-      obeta.textContent = e.beta.toFixed(4)
-      ogamma.textContent = e.gamma.toFixed(4)
-    }
+      const oabsolute = document.getElementById('oabsolute')
+      const oalpha = document.getElementById('oalpha')
+      const obeta = document.getElementById('obeta')
+      const ogamma = document.getElementById('ogamma')
 
-    window.addEventListener('deviceorientation', onOrientationEvent, true);
+      const onOrientationEvent = (e) => {
+        oabsolute.textContent = e.absolute
+        oalpha.textContent = e.alpha.toFixed(4)
+        obeta.textContent = e.beta.toFixed(4)
+        ogamma.textContent = e.gamma.toFixed(4)
+
+        if (new Date().getTime() < endTs) {
+          capturedEvents.push({
+            absolute: e.absolute,
+            alpha: e.alpha,
+            beta: e.beta,
+            gamma: e.gamma
+          })
+        } else if (downloadOrientationDataBtn.getAttribute('disabled') === 'true') {
+          const filename = 'orientation-events.json'
+          const data = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(capturedEvents));
+
+          downloadOrientationDataBtn.setAttribute('href', data);
+          downloadOrientationDataBtn.setAttribute('download', filename);
+          downloadOrientationDataBtn.setAttribute('disabled', 'false')
+          downloadOrientationDataBtn.textContent = 'Download Orientation JSON'
+
+          alert(`Captured ${capturedEvents.length} orientation events. JSON size is ${JSON.stringify(capturedEvents).length / 1024}kb. Use the button to download it.`)
+        }
+      }
+
+
+      window.addEventListener('deviceorientation', onOrientationEvent, true);
+    })()
   </script>
 
   <script>
+    const captureSeconds = 10
+    const capturedEvents = []
+    const startTs = new Date().getTime()
+    const endTs = startTs + captureSeconds * 1000
+    const downloadMotionDataBtn = document.getElementById('download-motion')
+
     const maccel = document.getElementById('maccel')
     const maccelg = document.getElementById('maccelg')
     const mrr = document.getElementById('mrr')
@@ -82,6 +124,37 @@
         maccelg.textContent = `${latestEvent.accelerationIncludingGravity.x.toFixed(2)}x, ${latestEvent.accelerationIncludingGravity.y.toFixed(2)}y, ${latestEvent.accelerationIncludingGravity.z.toFixed(2)}z`
         mrr.textContent = `${latestEvent.rotationRate.alpha.toFixed(2)}α, ${latestEvent.rotationRate.beta.toFixed(2)}β, ${latestEvent.rotationRate.gamma.toFixed(2)}γ`
         mint.textContent = `${latestEvent.interval}ms`
+      }
+
+      if (new Date().getTime() < endTs) {
+        capturedEvents.push({
+          acceleration: {
+            x: latestEvent.acceleration.x,
+            y: latestEvent.acceleration.y,
+            z: latestEvent.acceleration.z
+          },
+          accelerationIncludingGravity: {
+            x: latestEvent.accelerationIncludingGravity.x,
+            y: latestEvent.accelerationIncludingGravity.y,
+            z: latestEvent.accelerationIncludingGravity.z
+          },
+          rotationRate: {
+            alpha: latestEvent.rotationRate.alpha,
+            beta: latestEvent.rotationRate.beta,
+            gamma: latestEvent.rotationRate.gamma
+          },
+          interval: latestEvent.interval
+        })
+      } else if (downloadMotionDataBtn.getAttribute('disabled') === 'true') {
+        const filename = 'motion-events.json'
+        const data = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(capturedEvents));
+
+        downloadMotionDataBtn.setAttribute('href', data);
+        downloadMotionDataBtn.setAttribute('download', filename);
+        downloadMotionDataBtn.setAttribute('disabled', 'false')
+        downloadMotionDataBtn.textContent = 'Download Motion JSON'
+
+        alert(`Captured ${capturedEvents.length} motion events. JSON size is ${JSON.stringify(capturedEvents).length / 1024}kb. Use the button to download it.`)
       }
     }, 100)
 
