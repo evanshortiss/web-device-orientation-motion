@@ -83,7 +83,7 @@
         mrr.textContent = `${latestEvent.rotationRate.alpha.toFixed(2)}α, ${latestEvent.rotationRate.beta.toFixed(2)}β, ${latestEvent.rotationRate.gamma.toFixed(2)}γ`
         mint.textContent = `${latestEvent.interval}ms`
       }
-    }, 1000)
+    }, 100)
 
     const onMotionEvent = e => latestEvent = e
 
